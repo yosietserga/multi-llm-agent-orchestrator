@@ -37,7 +37,7 @@ Whether you're building an AI SaaS, an internal automation tool, or a developer 
 - Parallel DAG execution with subagent spawning
 
 **13 LLMs included:**
-GLM-4-Plus (live demo), DeepSeek-V3, Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, Qwen2.5-Max
+GLM-5.2 Max (live demo), DeepSeek-V3, Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, Qwen2.5-Max
 
 **Deploy anywhere:**
 One-click buttons for Railway, Render, and Vercel. Docker Compose for self-hosting. SQLite for dev, swap to PostgreSQL for production.

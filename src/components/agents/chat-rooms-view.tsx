@@ -95,7 +95,7 @@ export function ChatRoomsView({ connected, onRun, onStop, onReset }: Props) {
 
               <div className="flex items-center gap-1.5 border-b pb-1.5 text-[11px] text-muted-foreground">
                 <span className="font-medium">model:</span>
-                <span className="font-mono">z-ai / glm-4-plus @ glm-4-plus@2025-01</span>
+                <span className="font-mono">z-ai / glm-5.2-max @ glm-5.2-max@2025-01</span>
               </div>
 
               <div

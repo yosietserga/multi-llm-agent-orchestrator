@@ -40,7 +40,7 @@ Launch the **GLM-only self-demo** from the header → watch an orchestrator disp
 ### 6 LLM Models (incl. DeepSeek)
 | Model | Provider | Context | Strengths |
 |-------|----------|---------|-----------|
-| GLM-4-Plus | Z.ai | 128k | agentic reasoning, tool use |
+| GLM-5.2 Max | Z.ai | 128k | agentic reasoning, tool use |
 | DeepSeek-V3 | DeepSeek | 64k | code, math, cost efficiency |
 | Claude 3.5 Sonnet | Anthropic | 200k | reasoning, coding, safety |
 | GPT-4o | OpenAI | 128k | multimodal, function calling |
@@ -90,7 +90,7 @@ Open `http://localhost:81`.
 | Styling | Tailwind CSS 4 + shadcn/ui (New York) |
 | Database | Prisma ORM + SQLite (swap for PostgreSQL in production) |
 | Real-time | socket.io (in-process, Node dual-stack) |
-| AI | z-ai-web-dev-sdk (GLM-4-Plus) |
+| AI | z-ai-web-dev-sdk (GLM-5.2 Max) |
 | Auth | NextAuth.js v4 (credentials + roles) |
 | State | Zustand (client) + TanStack Query (server) |
 | Validation | Zod (typed schema contracts) |

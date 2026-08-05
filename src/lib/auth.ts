@@ -57,7 +57,7 @@ export function getUserFromRequest(req: Request): SessionUser | null {
   return decodeToken(token)
 }
 
-/** Seed demo users if they don't exist (idempotent, no bcrypt). */
+/** Seed demo users (idempotent upsert — overwrites old bcrypt hashes). */
 export async function seedDemoUsers(): Promise<void> {
   const users = [
     { email: 'admin@swarm.dev', name: 'Admin', password: 'admin123', role: 'admin' },
@@ -65,10 +65,13 @@ export async function seedDemoUsers(): Promise<void> {
     { email: 'viewer@swarm.dev', name: 'Viewer', password: 'viewer123', role: 'viewer' },
   ]
   for (const u of users) {
-    const existing = await db.user.findUnique({ where: { email: u.email } })
-    if (!existing) {
-      await db.user.create({ data: { email: u.email, name: u.name, passwordHash: u.password, role: u.role } })
-    }
+    // Upsert: overwrite passwordHash (in case old bcrypt hashes exist from
+    // a previous NextAuth seed) and role.
+    await db.user.upsert({
+      where: { email: u.email },
+      create: { email: u.email, name: u.name, passwordHash: u.password, role: u.role },
+      update: { name: u.name, passwordHash: u.password, role: u.role },
+    })
   }
 }
 

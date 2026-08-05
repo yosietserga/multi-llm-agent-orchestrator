@@ -2,7 +2,7 @@
  * LLM Model Registry — updated from OpenRouter (https://openrouter.ai/models).
  *
  * 338 models available on OpenRouter; this registry includes the flagship from
- * each major provider + GLM-4-Plus (the demo model, invokable via z-ai-web-dev-sdk).
+ * each major provider + GLM-5.2 Max (the demo model, invokable via z-ai-web-dev-sdk).
  *
  * Every log, finding, and report is tagged with { provider, model, version }.
  * Source: OpenRouter API (https://openrouter.ai/api/v1/models) — 338 models.
@@ -31,17 +31,17 @@ export interface LlmModelSpec {
 export const LLM_REGISTRY: LlmModelSpec[] = [
   // ── GLM (demo model — invokable via z-ai-web-dev-sdk) ──────────────────────
   {
-    id: 'glm-4-plus',
-    name: 'GLM-4-Plus',
+    id: 'glm-5.2-max',
+    name: 'GLM-5.2 Max',
     provider: 'z-ai',
     vendor: 'Z.ai',
-    version: 'glm-4-plus@2025-01',
-    contextWindow: 128_000,
+    version: 'glm-5.2-max@2026',
+    contextWindow: 256_000,
     modalities: ['text', 'vision'],
-    strengths: ['agentic reasoning', 'tool use', 'long context', 'multi-turn'],
+    strengths: ['agentic reasoning', 'tool use', 'long context', 'multi-turn', 'flagship'],
     accent: 'emerald',
     invokable: true,
-    zaiModel: 'glm-4-plus',
+    zaiModel: 'glm-5.2-max',
   },
   // ── OpenAI (from OpenRouter) ───────────────────────────────────────────────
   {
@@ -227,7 +227,7 @@ export const LLM_BY_ID: Record<string, LlmModelSpec> = Object.fromEntries(
 )
 
 /** The default model for the self-demo (GLM-only, per user request). */
-export const DEMO_MODEL_ID = 'glm-4-plus'
+export const DEMO_MODEL_ID = 'glm-5.2-max'
 
 /** Total models available on OpenRouter (for display). */
 export const OPENROUTER_TOTAL_MODELS = 338

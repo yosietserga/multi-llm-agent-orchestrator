@@ -27,7 +27,7 @@ export function LlmRegistryPanel() {
       <CardContent className="flex-1 overflow-hidden">
         <div className="space-y-2">
           {LLM_REGISTRY.map((m) => (
-            <div key={m.id} className={`rounded-md border p-2.5 ${ACCENT[m.accent] ?? ACCENT.emerald} ${m.id === 'glm-4-plus' ? 'ring-1 ring-emerald-500/50' : ''}`}>
+            <div key={m.id} className={`rounded-md border p-2.5 ${ACCENT[m.accent] ?? ACCENT.emerald} ${m.id === 'glm-5.2-max' ? 'ring-1 ring-emerald-500/50' : ''}`}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{m.name}</span>
                 {m.invokable ? (
@@ -37,7 +37,7 @@ export function LlmRegistryPanel() {
                 ) : (
                   <Badge variant="outline" className="text-[9px]">via endpoint</Badge>
                 )}
-                {m.id === 'glm-4-plus' && <Badge variant="secondary" className="ml-auto bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">demo</Badge>}
+                {m.id === 'glm-5.2-max' && <Badge variant="secondary" className="ml-auto bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">demo</Badge>}
               </div>
               <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
                 <span className="font-medium">{m.vendor}</span>
