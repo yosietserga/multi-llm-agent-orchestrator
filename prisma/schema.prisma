@@ -1,5 +1,4 @@
-// Multi-LLM Agent Orchestration — persistence layer
-// Each AgentRoom is a "chat room" for one LLM persona + topic (Round 52 vision).
+// Multi-LLM Agent Swarm Platform — persistence layer
 
 generator client {
   provider = "prisma-client-js"
@@ -12,59 +11,137 @@ datasource db {
 
 model AgentRoom {
   id             String   @id @default(cuid())
-  llm            String   // logical persona label: "qwen" | "glm" | "claude"
-  topic          String   // e.g. "widgets-cold-run"
+  llm            String
+  topic          String
   title          String
-  status         String   @default("idle") // idle | running | done | tripped | error
+  status         String   @default("idle")
   systemPrompt   String
   taskPrompt     String
-  allowedTools   String   @default("[]") // JSON array of permitted skill names (least-privilege)
-  schemaContract String   @default("{}") // JSON describing the typed contract the agent must satisfy
+  allowedTools   String   @default("[]")
+  schemaContract String   @default("{}")
   failures       Int      @default(0)
   circuitOpen    Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  messages  AgentMessage[]
-  findings  Finding[]
-  memories  EpisodicMemory[]
+  messages AgentMessage[]
+  findings Finding[]
+  memories EpisodicMemory[]
+  tasks    AgentTask[]
 }
 
 model AgentMessage {
-  id        String   @id @default(cuid())
-  roomId    String
-  role      String   // system | user | assistant | tool
-  content   String
-  tokenEst  Int      @default(0)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  roomId       String
+  taskId       String?
+  role         String
+  content      String
+  tokenEst     Int      @default(0)
+  provider     String?
+  model        String?
+  modelVersion String?
+  createdAt    DateTime @default(now())
 
   room AgentRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId])
+  @@index([taskId])
 }
 
 model Finding {
-  id        String   @id @default(cuid())
-  roomId    String
-  severity  String   // info | warn | critical
-  title     String
-  detail    String
-  validated Boolean  @default(false) // two-phase commit: committed only after schema validation
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  roomId       String
+  taskId       String?
+  severity     String
+  title        String
+  detail       String
+  validated    Boolean  @default(false)
+  provider     String?
+  model        String?
+  modelVersion String?
+  createdAt    DateTime @default(now())
 
   room AgentRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId])
+  @@index([taskId])
 }
 
 model EpisodicMemory {
   id        String   @id @default(cuid())
-  roomId    String?  // null = shared across all rooms
-  kind      String   // event | finding | decision
+  roomId    String?
+  taskId    String?
+  kind      String
   content   String
   createdAt DateTime @default(now())
 
   room AgentRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId])
+  @@index([taskId])
+}
+
+/// A swarm task — an agent (or subagent) working toward a goal.
+/// parentId links subagents to their parent agent (null = root task).
+model AgentTask {
+  id              String   @id @default(cuid())
+  parentId        String?
+  roomId          String?
+  title           String
+  goal            String
+  status          String   @default("backlog") // backlog|queued|running|done|blocked|tripped
+  kind            String   @default("agent")   // orchestrator|agent|subagent
+  assignedModel   String   @default("glm-4-plus")
+  provider        String   @default("z-ai")
+  modelVersion    String?
+  mainGoal        String?
+  result          String?
+  summary         String?
+  column          String   @default("backlog") // kanban column
+  priority        Int      @default(0)
+  order           Int      @default(0)
+  depth           Int      @default(0)
+  createdAt       DateTime @default(now())
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  durationMs      Int?
+
+  room    AgentRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  parent  AgentTask? @relation("TaskTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children AgentTask[] @relation("TaskTree")
+
+  @@index([parentId])
+  @@index([roomId])
+  @@index([status])
+  @@index([column])
+}
+
+/// Custom OpenAI / Anthropic compatible LLM API endpoints (CRUD).
+model LlmEndpoint {
+  id        String   @id @default(cuid())
+  name      String
+  provider  String   @default("openai") // openai|anthropic|z-ai|custom
+  baseUrl   String
+  apiKey    String
+  model     String
+  headers   String   @default("{}")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Versioned reports produced by orchestrated agent runs.
+/// Every report carries the LLM model specs + versions used.
+model Report {
+  id           String   @id @default(cuid())
+  title        String
+  mainGoal     String
+  body         String
+  provider     String
+  models       String   @default("[]") // JSON array of {provider,model,version}
+  taskCount    Int      @default(0)
+  findingCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
 }

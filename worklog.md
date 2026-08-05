@@ -52,3 +52,25 @@ Stage Summary:
 - 2 commits on main: `feat: multi-LLM agent orchestration dashboard` + `chore: remove stray download/README.md (gitignored)`
 - 18 top-level entries (src, prisma, mini-services/agent-service, Caddyfile, package.json, worklog.md, etc.)
 - No secrets, binaries, or unrelated repos pushed. Token not stored in git config.
+
+---
+Task ID: R53-agent-swarm-platform
+Agent: Z.ai Code (main)
+Task: Extend the Multi-LLM Agent Orchestrator into a full Agent Swarm Platform: add DeepSeek + top 5 LLMs, 8 views (n8n-animated swarm workflow, Kanban, Gantt, Chat rooms, 100 Skills explorer, 10 MCP connectors, Endpoints CRUD, versioned Reports), subagents, GLM-only self-demo dispatching orchestrated tasks toward a main goal, with every log/report tagged with LLM model specs+versions.
+
+Work Log:
+- Extended Prisma schema: AgentTask (parentId for subagent tree, assignedModel/provider/modelVersion, mainGoal, depth, kanban column, timings), LlmEndpoint (custom OpenAI/Anthropic-compatible CRUD), Report (versioned, models JSON), and added taskId+modelSpec fields to AgentMessage/Finding/EpisodicMemory. Pushed + generated.
+- Built registries: models.ts (6 LLMs: GLM-4-Plus[invokable], DeepSeek-V3, Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, Qwen2.5-Max), skills.ts (exactly 100 skills across 9 categories, 75 invokable), mcp.ts (10 built-in MCP connectors: filesystem/github/postgres/sqlite/web-search/web-fetch/slack/email/shell/memory).
+- Rewrote shared types (swarm tasks, endpoints, reports, 8 ViewId, socket events for task:upsert/task:stream/task:finding/report:new) and Zustand store (view switcher, task tree upsert with child insertion, memory, endpoints, reports).
+- Extended agent-server.ts: swarm orchestrator (runDemo) creates an orchestrator task → fans out to 4 parallel GLM agents (staggered 1.5s to avoid 429) → each may spawn a subagent (depth 2) → produces a versioned Report. Added 429 retry with exponential backoff in callLlm. Every memory/finding/report tagged with {provider,model,version}. Two-phase commit (Zod schema validation) gates finding persistence.
+- Built 8 view components: SwarmWorkflowView (SVG n8n-style DAG with animated dashed edges for active data flow, node tooltips), KanbanView (5 columns, click to inspect), GanttView (timeline bars with now-marker), ChatRoomsView (room list + streaming + findings), SkillsView (100 skills, search + category filter), McpView (grouped by type, status badges), EndpointsView (full CRUD dialog with provider/model/baseUrl/apiKey), ReportsView (versioned, model-spec badges, dialog with full body), LlmRegistryPanel (6 models with version+context+strengths).
+- Built SwarmPlatform shell: sticky header (8 view tabs + demo launcher with editable main goal), main content area switching by view, stats ribbon (100 skills / 10 MCP / 6 LLMs / 9 patterns), sticky footer. page.tsx renders <SwarmPlatform/>.
+- API routes: /api/endpoints (GET/POST + [id] PATCH/DELETE), /api/tasks (tree builder), /api/skills, /api/mcp, /api/reports, /api/demo (POST to launch demo headlessly).
+- Fixed bugs: ServerToServerEvents typo, Next.js private-folder (_agent → agent), Prisma client stale after schema push (dev restart), task-tree children linking (raw node push + recursive build), demo room FK (seeded room-demo-swarm), 429 rate-limit (stagger + retry), Prisma query-log memory pressure (disabled query logging), debug console.log cleanup.
+- Self-verification (Agent Browser via gateway :81): all 8 views render. Launched GLM-only demo via /api/demo (headless, avoids browser memory pressure during long run). Result: 1 orchestrator → 4 parallel agents → 2 subagents (7 tasks/run), 21 validated findings tagged z-ai/glm-4-plus, 5 reports each tagged [Z.ai/glm-4-plus@glm-4-plus@2025-01]. Lint clean.
+
+Stage Summary:
+- Delivered a full Agent Swarm Platform at / with 8 views, 100 skills, 10 MCP connectors, 6 LLMs (incl. DeepSeek), subagent spawning, and GLM-only self-demo producing versioned reports.
+- The self-demo ran successfully: orchestrator dispatched 4 parallel agents (Architecture/Security/Features/UX) + 2 deep-dive subagents, all aligned to the main goal, producing 21 findings and a report with model specs.
+- Every log, finding, and report carries LLM model specs + versions (provider/model/version/vendor).
+- Note: the in-process socket.io server + long streaming demo can pressure sandbox memory; the demo also runs headlessly via POST /api/demo. All data persists in SQLite across restarts.
