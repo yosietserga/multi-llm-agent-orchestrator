@@ -262,13 +262,26 @@ async function streamToTask(io: Server<ClientToServerEvents, ServerToClientEvent
   return true
 }
 
+/** Lazy ZAI initializer — only called when a demo/room actually runs. */
+async function getZai(state: AgentServerState): Promise<ZaiInstance> {
+  if (state.zai) return state.zai
+  try {
+    state.zai = await ZAI.create()
+    console.log('[agent-server] ZAI SDK initialized (GLM, lazy)')
+  } catch (err) {
+    console.error('[agent-server] ZAI SDK init failed:', err instanceof Error ? err.message : err)
+    throw new Error('ZAI SDK init failed: ' + (err instanceof Error ? err.message : err))
+  }
+  return state.zai
+}
+
 /** Call the LLM (GLM via z-ai). Retries on 429 with exponential backoff. */
 async function callLlm(state: AgentServerState, systemPrompt: string, userPrompt: string): Promise<{ content: string; raw: any }> {
-  if (!state.zai) throw new Error('ZAI SDK not initialized')
+  const zai = await getZai(state)
   let lastErr: unknown
   for (let attempt = 1; attempt <= 4; attempt++) {
     try {
-      const completion = await state.zai.chat.completions.create({
+      const completion = await zai.chat.completions.create({
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -312,17 +325,17 @@ async function runRoom(state: AgentServerState, roomId: string): Promise<void> {
 
   try {
     let toolContext = ''
-    if (room.allowedTools.includes('web_search' as ToolName) && state.zai) {
+    if (room.allowedTools.includes('web_search' as ToolName)) {
       try {
+        const zai = await getZai(state)
         broadcastMemory(io, roomId, null, 'event', `invoking scoped tool: web_search("${room.topic}")`, DEMO_MODEL_SPEC)
-        const results = await state.zai.functions.invoke('web_search', { query: room.topic, num: 3 })
+        const results = await zai.functions.invoke('web_search', { query: room.topic, num: 3 })
         toolContext = results.map((r) => `- ${r.name}: ${r.snippet}`).join('\n').slice(0, 600)
         broadcastMemory(io, roomId, null, 'event', `web_search returned ${results.length} results (scoped)`, DEMO_MODEL_SPEC)
       } catch (err) {
         broadcastMemory(io, roomId, null, 'event', `web_search unavailable: ${(err as Error).message}`, DEMO_MODEL_SPEC)
       }
     }
-    if (!state.zai) throw new Error('ZAI SDK not initialized')
     if (token.cancelled) return
 
     const systemPrompt =
@@ -696,13 +709,10 @@ async function bootServer(): Promise<AgentServerState> {
     pingInterval: 25000,
   })
 
-  let zai: ZaiInstance | null = null
-  try {
-    zai = await ZAI.create()
-    console.log('[agent-server] ZAI SDK initialized (GLM)')
-  } catch (err) {
-    console.error('[agent-server] ZAI SDK init failed:', err instanceof Error ? err.message : err)
-  }
+  // LAZY: do NOT call ZAI.create() at boot — it allocates significant memory and
+  // causes the sandbox OOM-killer to reap the dev process on page load. ZAI is
+  // initialized on first demo/room run instead (getZai()).
+  const zai: ZaiInstance | null = null
 
   io.on('connection', (socket) => {
     socket.emit('connect_ack', { dag: 'idle' })
