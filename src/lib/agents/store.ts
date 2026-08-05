@@ -43,8 +43,10 @@ interface SwarmStateStore {
   lastError: string | null
   demoRunning: boolean
   demoMainGoal: string | null
+  user: { email: string; name: string; role: string } | null
 
   /* setters */
+  setUser: (u: { email: string; name: string; role: string } | null) => void
   setConnected: (v: boolean) => void
   setSelectedRoom: (id: string | null) => void
   setSelectedTask: (id: string | null) => void
@@ -121,6 +123,9 @@ export const useSwarmStore = create<SwarmStateStore>((set) => ({
   lastError: null,
   demoRunning: false,
   demoMainGoal: null,
+  user: null,
+
+  setUser: (u) => set({ user: u }),
 
   setConnected: (v) => set({ connected: v }),
   setSelectedRoom: (id) => set({ selectedRoomId: id }),

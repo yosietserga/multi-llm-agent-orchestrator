@@ -1,0 +1,20 @@
+# Railway deployment config for the Multi-LLM Agent Swarm Platform.
+# Deploy: connect your GitHub repo at https://railway.app → New Project → Deploy
+# Railway supports long-running processes (socket.io works in production here).
+#
+# Or one-click deploy via the README button:
+# https://railway.app/new?githubUrl=yosietserga/multi-llm-agent-orchestrator
+
+[deploy]
+startCommand = "npx prisma db push --accept-data-loss && npx next start -p $PORT"
+healthcheckPath = "/api/agent/bootstrap"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npx prisma generate && npm run build"
+
+[env]
+NODE_ENV = "production"
+NEXTAUTH_URL = "${{RAILWAY_PUBLIC_DOMAIN}}"

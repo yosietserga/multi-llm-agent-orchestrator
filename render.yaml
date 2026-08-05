@@ -1,0 +1,23 @@
+# Render deployment config for the Multi-LLM Agent Swarm Platform.
+# Deploy: connect your GitHub repo at https://render.com → New → Web Service
+# Render supports long-running processes (socket.io works in production here).
+
+services:
+  - type: web
+    name: agent-swarm-platform
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --accept-data-loss && npx next start -p $PORT
+    healthCheckPath: /api/agent/bootstrap
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        # Use Render's internal PostgreSQL or Turso for SQLite
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        value: https://your-app.onrender.com
+      - key: NODE_ENV
+        value: production

@@ -10,6 +10,7 @@ import {
   Workflow, KanbanSquare, BarChart3, MessagesSquare, Sparkles, Plug, Server, FileText,
   Brain, Cpu, ShieldCheck,
 } from 'lucide-react'
+import { AuthBar } from './auth-bar'
 import { useSwarmStore } from '@/lib/agents/store'
 import { useAgentSocket } from '@/lib/agents/use-agent-socket'
 import { SKILL_COUNT } from '@/lib/agents/skills'
@@ -125,6 +126,7 @@ export function SwarmPlatform() {
             <Badge variant="secondary" className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
               demo: {DEMO_MODEL_ID}
             </Badge>
+            <AuthBar />
           </div>
         </div>
 

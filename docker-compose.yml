@@ -1,0 +1,48 @@
+# Multi-LLM Agent Swarm Platform — Docker Compose
+# One command: `docker compose up` → app on http://localhost:81
+#
+# Services:
+#   - swarm-app  : Next.js app + in-process socket.io (port 3000 internal)
+#   - caddy      : Gateway reverse proxy with XTransformPort support (port 81)
+#
+# The SQLite DB persists in a volume (./data/db) so data survives restarts.
+
+services:
+  swarm-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swarm-app
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=file:/app/db/custom.db
+      - NEXTAUTH_URL=http://localhost:81
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production-please-use-openssl-rand-base64-32}
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - db-data:/app/db
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/agent/bootstrap"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: swarm-caddy
+    restart: unless-stopped
+    ports:
+      - "81:81"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      swarm-app:
+        condition: service_healthy
+
+volumes:
+  db-data:
+    driver: local

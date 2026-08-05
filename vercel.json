@@ -1,0 +1,23 @@
+# Vercel deployment config for the Multi-LLM Agent Swarm Platform.
+# Deploy: import the GitHub repo at https://vercel.com/new
+#
+# Note: Vercel serverless functions have a timeout. The in-process socket.io
+# server works on Vercel dev mode but for production WebSocket support, use
+# Railway/Render instead (they support long-running processes).
+# The REST API + all 8 views work perfectly on Vercel.
+
+[build]
+command = "prisma generate && next build"
+publish = ".next"
+
+[build.environment]
+NEXTAUTH_URL = "https://your-app.vercel.app"
+# Set NEXTAUTH_SECRET and DATABASE_URL in the Vercel dashboard.
+
+[[plugins]]
+package = "@vercel/next"
+
+# Note: SQLite (file:) won't persist on Vercel serverless. Use a hosted DB:
+# - Neon (free PostgreSQL): https://neon.tech
+# - PlanetScale (free MySQL): https://planetscale.com
+# - Turso (free SQLite): https://turso.tech
