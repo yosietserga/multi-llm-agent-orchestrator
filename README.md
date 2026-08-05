@@ -1,6 +1,6 @@
 # 🤖 AIgent Swarm — Multi-LLM Agent Orchestration Platform
 
-> The all-in-one platform to build, visualize, and orchestrate AI agent swarms. 6 LLMs · 100 skills · 10 MCP connectors · 8 professional views.
+> The all-in-one platform to build, visualize, and orchestrate AI agent swarms. 13 LLMs · 100 skills · 10 MCP connectors · 8 professional views.
 
 > ⚠️ **One-click deploy requires a public repo.** This repo is currently private — either make it public in GitHub settings, or fork/clone it to a public repo first, then use the buttons below with your own URL.
 
@@ -105,7 +105,7 @@ Open `http://localhost:81`.
 - ✅ NextAuth.js auth with 3 roles (admin/operator/viewer)
 - ✅ 100 skills registry (9 categories)
 - ✅ 10 MCP connectors (built-in)
-- ✅ 6 LLM models registry (incl. DeepSeek)
+- ✅ 13 LLM models registry (incl. DeepSeek)
 - ✅ Custom LLM endpoint CRUD (OpenAI/Anthropic-compatible)
 - ✅ Zod typed schema contracts + two-phase commit
 - ✅ Circuit-breaker per agent

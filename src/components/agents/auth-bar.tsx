@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -34,19 +34,24 @@ export function AuthBar() {
   const [email, setEmail] = useState('admin@swarm.dev')
   const [password, setPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
+
+  // Auth calls are DEFERRED to the first "Sign in" click to avoid compiling
+  // the NextAuth + bcrypt routes on page load (which causes sandbox OOM).
   const [seeded, setSeeded] = useState(false)
 
-  useEffect(() => {
-    fetch('/api/auth/seed-admin', { method: 'POST' })
-      .then(() => setSeeded(true))
-      .catch(() => {})
-    // Check existing session.
-    fetch('/api/auth/session').then((r) => r.json()).then((s) => {
-      if (s?.user?.email) {
-        setUser({ email: s.user.email, name: s.user.name ?? s.user.email, role: s.user.role ?? 'viewer' })
-      }
-    }).catch(() => {})
-  }, [setUser])
+  async function openDialog() {
+    setOpen(true)
+    if (!seeded) {
+      try {
+        await fetch('/api/auth/seed-admin', { method: 'POST' })
+        const s = await fetch('/api/auth/session').then((r) => r.json())
+        if (s?.user?.email) {
+          setUser({ email: s.user.email, name: s.user.name ?? s.user.email, role: s.user.role ?? 'viewer' })
+        }
+      } catch { /* ignore */ }
+      setSeeded(true)
+    }
+  }
 
   async function login() {
     setLoading(true)
@@ -113,7 +118,7 @@ export function AuthBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1.5" disabled={!seeded}>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={openDialog}>
           <LogIn className="h-3.5 w-3.5" /> Sign in
         </Button>
       </DialogTrigger>

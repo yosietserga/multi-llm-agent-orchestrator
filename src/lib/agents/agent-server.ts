@@ -501,7 +501,7 @@ const DEMO_SUBGOALS: { id: string; title: string; goal: string; system: string }
   {
     id: 'demo-features',
     title: 'Feature Completeness Agent',
-    goal: 'Audit the platform against its claimed 100 skills, 10 MCP connectors, 6 LLMs, and 8 views (swarm/kanban/gantt/chat/skills/mcp/endpoints/reports). Identify 3 gaps between claimed and real.',
+    goal: 'Audit the platform against its claimed 100 skills, 10 MCP connectors, 13 LLMs, and 8 views (swarm/kanban/gantt/chat/skills/mcp/endpoints/reports). Identify 3 gaps between claimed and real.',
     system: 'You are a product engineer auditing feature completeness. Be honest about declarative vs invokable. Return ONLY compact JSON matching the contract.',
   },
   {

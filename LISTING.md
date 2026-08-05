@@ -4,7 +4,7 @@
 **AIgent Swarm — Multi-LLM Agent Orchestration Dashboard | Next.js 16 + 100 Skills + MCP**
 
 ## Short Description (140 chars)
-Build, visualize, and orchestrate AI agent swarms. 6 LLMs, 100 skills, 10 MCP connectors, 8 pro views (Kanban, Gantt, n8n-workflow). GLM demo included.
+Build, visualize, and orchestrate AI agent swarms. 13 LLMs, 100 skills, 10 MCP connectors, 8 pro views (Kanban, Gantt, n8n-workflow). GLM demo included.
 
 ## Long Description
 
@@ -12,7 +12,7 @@ Build, visualize, and orchestrate AI agent swarms. 6 LLMs, 100 skills, 10 MCP co
 
 **AIgent Swarm** is a production-ready Next.js 16 platform that lets you orchestrate multiple LLM agents in parallel — with a beautiful, responsive UI your users will love.
 
-Whether you're building an AI SaaS, an internal automation tool, or a developer platform, AIgent Swarm gives you everything: **8 professional views**, **100 pre-built skills**, **10 MCP connectors**, **6 LLM models** (including DeepSeek), and a **GLM-powered self-demo** that proves it works out of the box.
+Whether you're building an AI SaaS, an internal automation tool, or a developer platform, AIgent Swarm gives you everything: **8 professional views**, **100 pre-built skills**, **10 MCP connectors**, **13 LLM models** (including DeepSeek), and a **GLM-powered self-demo** that proves it works out of the box.
 
 ---
 
@@ -36,7 +36,7 @@ Whether you're building an AI SaaS, an internal automation tool, or a developer 
 - Shared episodic memory across agents
 - Parallel DAG execution with subagent spawning
 
-**6 LLMs included:**
+**13 LLMs included:**
 GLM-4-Plus (live demo), DeepSeek-V3, Claude 3.5 Sonnet, GPT-4o, Gemini 1.5 Pro, Qwen2.5-Max
 
 **Deploy anywhere:**

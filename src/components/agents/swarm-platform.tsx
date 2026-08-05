@@ -60,28 +60,18 @@ export function SwarmPlatform() {
     let cancelled = false
     ;(async () => {
       try {
-        await fetch('/api/seed', { method: 'POST' })
-        const [roomsRes, memRes, tasksRes, endpointsRes, reportsRes] = await Promise.all([
-          fetch('/api/rooms'),
-          fetch('/api/memory'),
-          fetch('/api/tasks'),
-          fetch('/api/endpoints'),
-          fetch('/api/reports'),
-        ])
-        const roomsJson = await roomsRes.json()
-        const memJson = await memRes.json()
-        const tasksJson = await tasksRes.json()
-        const endpointsJson = await endpointsRes.json()
-        const reportsJson = await reportsRes.json()
+        // Single combined request (avoids 6 parallel route compilations → OOM).
+        const res = await fetch('/api/bootstrap-data')
+        const data = await res.json()
         if (cancelled) return
         hydrateFromApi(
-          Array.isArray(roomsJson.rooms) ? roomsJson.rooms : [],
-          Array.isArray(tasksJson.tasks) ? (tasksJson.tasks as SwarmTask[]) : undefined,
-          Array.isArray(endpointsJson.endpoints) ? (endpointsJson.endpoints as LlmEndpointRow[]) : undefined,
-          Array.isArray(reportsJson.reports) ? (reportsJson.reports as ReportRow[]) : undefined,
+          Array.isArray(data.rooms) ? data.rooms : [],
+          Array.isArray(data.tasks) ? (data.tasks as SwarmTask[]) : undefined,
+          Array.isArray(data.endpoints) ? (data.endpoints as LlmEndpointRow[]) : undefined,
+          Array.isArray(data.reports) ? (data.reports as ReportRow[]) : undefined,
         )
-        if (Array.isArray(memJson.memory)) {
-          memJson.memory.reverse().forEach((e: MemoryEvent) => pushMemory(e))
+        if (Array.isArray(data.memory)) {
+          data.memory.reverse().forEach((e: MemoryEvent) => pushMemory(e))
         }
       } catch (err) {
         setLastError(err instanceof Error ? err.message : 'hydrate failed')
@@ -204,7 +194,7 @@ export function SwarmPlatform() {
         <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard icon={<Sparkles className="h-4 w-4" />} label="Skills" value={SKILL_COUNT} sub="9 categories" />
           <StatCard icon={<Plug className="h-4 w-4" />} label="MCP connectors" value={MCP_COUNT} sub="built-in" />
-          <StatCard icon={<Cpu className="h-4 w-4" />} label="LLM models" value={LLM_REGISTRY.length} sub="incl. DeepSeek" />
+          <StatCard icon={<Cpu className="h-4 w-4" />} label="LLM models" value={LLM_REGISTRY.length} sub="incl. DeepSeek V4, GPT-5.6, Claude Opus 5" />
           <StatCard icon={<ShieldCheck className="h-4 w-4" />} label="Patterns" value={9} sub="research patterns" />
         </section>
       </main>
@@ -213,7 +203,7 @@ export function SwarmPlatform() {
       <footer className="mt-auto border-t bg-background">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-muted-foreground sm:px-6">
           <span>Agent Swarm Platform · socket.io :3003 · Next.js 16 · z-ai-web-dev-sdk (GLM)</span>
-          <span>100 skills · 10 MCP · 6 LLMs · Zod typed contracts · Two-Phase Commit</span>
+          <span>100 skills · 10 MCP · 13 LLMs · Zod typed contracts · Two-Phase Commit</span>
         </div>
       </footer>
     </div>
