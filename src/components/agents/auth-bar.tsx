@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LogIn, LogOut, UserCircle, Shield, Loader2 } from 'lucide-react'
 import { useSwarmStore } from '@/lib/agents/store'
 import { useToast } from '@/hooks/use-toast'
@@ -28,55 +27,39 @@ const ROLE_STYLE: Record<string, string> = {
 export function AuthBar() {
   const user = useSwarmStore((s) => s.user)
   const setUser = useSwarmStore((s) => s.setUser)
-  const setLastError = useSwarmStore((s) => s.setLastError)
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('admin@swarm.dev')
   const [password, setPassword] = useState('admin123')
   const [loading, setLoading] = useState(false)
 
-  // Auth calls are DEFERRED to the first "Sign in" click to avoid compiling
-  // the NextAuth + bcrypt routes on page load (which causes sandbox OOM).
-  const [seeded, setSeeded] = useState(false)
-
-  async function openDialog() {
-    setOpen(true)
-    if (!seeded) {
-      try {
-        await fetch('/api/auth/seed-admin', { method: 'POST' })
-        const s = await fetch('/api/auth/session').then((r) => r.json())
-        if (s?.user?.email) {
-          setUser({ email: s.user.email, name: s.user.name ?? s.user.email, role: s.user.role ?? 'viewer' })
+  // Check existing session on mount (single lightweight call).
+  useState(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.user?.email) {
+          setUser({ email: d.user.email, name: d.user.name, role: d.user.role })
         }
-      } catch { /* ignore */ }
-      setSeeded(true)
-    }
-  }
+      })
+      .catch(() => {})
+  })
 
   async function login() {
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/callback/credentials', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          email,
-          password,
-          csrfToken: await getCsrfToken(),
-          json: 'true',
-        }),
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       })
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}))
-        if (data?.user?.email) {
-          setUser({ email: data.user.email, name: data.user.name ?? data.user.email, role: data.user.role ?? 'viewer' })
-          toast({ title: `Welcome, ${data.user.name ?? data.user.email}` })
-          setOpen(false)
-        } else {
-          toast({ title: 'Login failed', variant: 'destructive' })
-        }
+      const data = await res.json()
+      if (res.ok && data?.user?.email) {
+        setUser({ email: data.user.email, name: data.user.name, role: data.user.role })
+        toast({ title: `Welcome, ${data.user.name}` })
+        setOpen(false)
       } else {
-        toast({ title: 'Login failed', variant: 'destructive' })
+        toast({ title: 'Login failed', description: data?.error || '', variant: 'destructive' })
       }
     } catch (err) {
       toast({ title: 'Login error', description: err instanceof Error ? err.message : '', variant: 'destructive' })
@@ -87,16 +70,10 @@ export function AuthBar() {
 
   async function logout() {
     try {
-      await fetch('/api/auth/signout', { method: 'POST' })
+      await fetch('/api/auth/logout', { method: 'POST' })
       setUser(null)
       toast({ title: 'Signed out' })
     } catch {}
-  }
-
-  async function getCsrfToken(): Promise<string> {
-    const r = await fetch('/api/auth/csrf')
-    const d = await r.json()
-    return d.csrfToken ?? ''
   }
 
   if (user) {
@@ -118,7 +95,7 @@ export function AuthBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={openDialog}>
+        <Button size="sm" variant="outline" className="gap-1.5">
           <LogIn className="h-3.5 w-3.5" /> Sign in
         </Button>
       </DialogTrigger>

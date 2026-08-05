@@ -44,9 +44,12 @@ export function EndpointsView() {
     }
   }, [setEndpoints])
 
+  // Endpoints are already loaded via bootstrap-data into the store.
+  // Only fetch if the store is empty (e.g. user navigated directly to this view
+  // after a page refresh that cleared the store).
   useEffect(() => {
-    refresh()
-  }, [refresh])
+    if (endpoints.length === 0) refresh()
+  }, [refresh, endpoints.length])
 
   async function submit() {
     if (!form.name || !form.baseUrl || !form.model) {
