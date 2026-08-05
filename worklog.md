@@ -74,3 +74,26 @@ Stage Summary:
 - The self-demo ran successfully: orchestrator dispatched 4 parallel agents (Architecture/Security/Features/UX) + 2 deep-dive subagents, all aligned to the main goal, producing 21 findings and a report with model specs.
 - Every log, finding, and report carries LLM model specs + versions (provider/model/version/vendor).
 - Note: the in-process socket.io server + long streaming demo can pressure sandbox memory; the demo also runs headlessly via POST /api/demo. All data persists in SQLite across restarts.
+
+---
+Task ID: R54-auth-deploy-marketing
+Agent: Z.ai Code (main)
+Task: Implement the 3 technical closures (auth + multi-tenant, one-click deploy, Docker compose) + generate marketing assets (README, Envato listing, video script, roadmap).
+
+Work Log:
+- Extended Prisma schema: User (email, passwordHash, role), Account, Session, VerificationToken (NextAuth.js compatible). Pushed + generated.
+- Built NextAuth.js v4 config (src/lib/auth.ts): credentials provider, JWT strategy with role, session callback. Session helper (src/lib/session.ts) with hasRole().
+- API routes: /api/auth/[...nextauth] (handler), /api/auth/seed-admin (idempotent 3 demo users: admin/operator/viewer with bcrypt-hashed passwords).
+- AuthBar component: login dialog with demo-account quick-select buttons, role badge (admin=red, operator=sky, viewer=muted), sign-out. Integrated into platform header.
+- Zustand store: added `user` state + setUser.
+- Docker: multi-stage Dockerfile (node:22-alpine, prisma generate + build + db push on boot), docker-compose.yml (app + caddy + db volume + healthcheck).
+- Deploy configs: vercel.json, railway.json (Nixpacks), render.yaml (free tier). .env.example with all variables.
+- Marketing: README.md (Envato-optimized with deploy buttons, demo accounts, feature tables, tech stack), LISTING.md (full Envato description + 3-tier pricing + tags), VIDEO-SCRIPT.md (2-min timeline), ROADMAP.md (v1.0→v2.0).
+- Fixed blank-preview recurrence: lazy ZAI.init (only on first demo run, not at bootstrap) prevents sandbox OOM.
+- Verified via API: 3 auth users seeded, 100 skills, 10 MCP, session endpoint works. Agent Browser confirmed page renders with Sign in button + login flow succeeds (logged in as admin).
+
+Stage Summary:
+- Auth + multi-tenant: NextAuth.js v4, 3 roles, demo users auto-seeded, login dialog working.
+- One-click deploy: Docker Compose, Vercel/Railway/Render configs + buttons in README.
+- Marketing assets: 4 docs (README, LISTING, VIDEO-SCRIPT, ROADMAP) ready for Envato launch.
+- Committed c94109c, pushed to private repo.
