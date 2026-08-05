@@ -3,7 +3,7 @@
 # Railway supports long-running processes (socket.io works in production here).
 #
 # Or one-click deploy via the README button:
-# https://railway.app/new?githubUrl=yosietserga/multi-llm-agent-orchestrator
+# https://railway.app/new?githubUrl=https://github.com/yosietserga/multi-llm-agent-orchestrator
 
 [deploy]
 startCommand = "npx prisma db push --accept-data-loss && npx next start -p $PORT"

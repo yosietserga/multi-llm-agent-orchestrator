@@ -4,13 +4,8 @@ import { db } from '@/lib/db'
 
 /**
  * POST /api/auth/seed-admin
- * Idempotently seeds 3 demo users (admin/operator/viewer) so the auth flow
- * is testable out of the box. Safe to call repeatedly — upserts by email.
- *
- * Demo credentials (returned in the response for convenience):
- *   admin@swarm.dev     / admin123     (full access)
- *   operator@swarm.dev  / operator123  (run demos, no endpoint delete)
- *   viewer@swarm.dev    / viewer123    (read-only)
+ * Idempotently seeds 3 demo users (admin/operator/viewer). Skips re-hashing
+ * if the users already exist (avoids bcrypt CPU spike on every page load).
  */
 export async function POST() {
   const users = [
@@ -19,6 +14,11 @@ export async function POST() {
     { email: 'viewer@swarm.dev', name: 'Viewer', password: 'viewer123', role: 'viewer' },
   ]
   try {
+    // Fast path: if all 3 users exist, skip bcrypt entirely.
+    const existing = await db.user.count({ where: { email: { in: users.map((u) => u.email) } } })
+    if (existing >= users.length) {
+      return NextResponse.json({ ok: true, skipped: true, users: users.map((u) => ({ email: u.email, name: u.name, role: u.role, password: u.password })) })
+    }
     for (const u of users) {
       const passwordHash = await bcrypt.hash(u.password, 10)
       await db.user.upsert({

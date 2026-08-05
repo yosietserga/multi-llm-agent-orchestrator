@@ -2,9 +2,11 @@
 
 > The all-in-one platform to build, visualize, and orchestrate AI agent swarms. 6 LLMs · 100 skills · 10 MCP connectors · 8 professional views.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?githubUrl=yosietserga/multi-llm-agent-orchestrator)
-[![Deploy on Render](https://render.com/images/deploy-render.svg)](https://render.com/deploy)
-[![Deploy on Vercel](https://vercel.com/button)](https://vercel.com/new)
+> ⚠️ **One-click deploy requires a public repo.** This repo is currently private — either make it public in GitHub settings, or fork/clone it to a public repo first, then use the buttons below with your own URL.
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?githubUrl=https://github.com/yosietserga/multi-llm-agent-orchestrator)
+[![Deploy on Render](https://render.com/images/deploy-render.svg)](https://render.com/deploy?repo=https://github.com/yosietserga/multi-llm-agent-orchestrator)
+[![Deploy on Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/yosietserga/multi-llm-agent-orchestrator)
 
 ---
 
@@ -73,9 +75,10 @@ docker compose up
 Open `http://localhost:81`.
 
 ### Option 3: One-Click Deploy
-- **Railway**: [![Railway](https://railway.app/button.svg)](https://railway.app/new?githubUrl=yosietserga/multi-llm-agent-orchestrator)
-- **Render**: [![Render](https://render.com/images/deploy-render.svg)](https://render.com/deploy)
-- **Vercel** (REST only, no WebSocket): [![Vercel](https://vercel.com/button)](https://vercel.com/new)
+> **Note:** One-click deploy requires a **public** GitHub repo. If this repo is private, make it public first (or fork it), then click the buttons.
+- **Railway**: [![Railway](https://railway.app/button.svg)](https://railway.app/new?githubUrl=https://github.com/yosietserga/multi-llm-agent-orchestrator)
+- **Render**: [![Render](https://render.com/images/deploy-render.svg)](https://render.com/deploy?repo=https://github.com/yosietserga/multi-llm-agent-orchestrator)
+- **Vercel** (REST only, no WebSocket): [![Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/yosietserga/multi-llm-agent-orchestrator)
 
 ---
 
