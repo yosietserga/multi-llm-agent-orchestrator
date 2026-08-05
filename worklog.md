@@ -97,3 +97,47 @@ Stage Summary:
 - One-click deploy: Docker Compose, Vercel/Railway/Render configs + buttons in README.
 - Marketing assets: 4 docs (README, LISTING, VIDEO-SCRIPT, ROADMAP) ready for Envato launch.
 - Committed c94109c, pushed to private repo.
+
+---
+Task ID: R55-SIL-auth-glm52
+Agent: Z.ai Code (main)
+Task: Fix 401 login error, update GLM to 5.2 Max, apply self-improvement/self-learn best practices.
+
+SIL Findings (Self-Improvement Loop):
+- FINDING 1 (P0): 401 on /api/auth/login — root cause was bcrypt hash migration.
+  Old NextAuth seed-admin created users with bcrypt hashes in passwordHash.
+  New lightweight auth does plain-text comparison. Existing DB users had
+  bcrypt hashes → comparison failed → 401 → user retried → server OOM crash → 502.
+  FIX: seedDemoUsers() uses upsert (overwrites old hashes with plain text).
+  LESSON: when replacing an auth system, always migrate existing credentials,
+  not just create-if-missing.
+
+- FINDING 2 (P1): GLM model was outdated (4-Plus). User says latest is 5.2 Max.
+  FIX: updated models.ts, agent-server DEMO_MODEL_SPEC, chat-rooms-view,
+  llm-registry-panel, README, LISTING. All references now use glm-5.2-max@2026.
+  LESSON: verify model versions against the provider's latest docs, don't
+  rely on hardcoded versions from earlier sessions.
+
+- FINDING 3 (P2): Server stability — the dev server (Turbopack) uses ~1GB RSS.
+  The sandbox kills background processes between tool calls, making browser
+  testing unreliable. Pre-warming all routes (including login/logout) in a
+  single bash call is the reliable verification method.
+  LESSON: test via curl in a single tool call rather than across multiple
+  calls when the server is memory-pressured.
+
+Verification (all in one bash call to avoid server death):
+1. page renders ✅
+2. bootstrap-data: 4 rooms, 13 models, 5 reports ✅
+3. GLM-5.2 Max visible ✅
+4. auth/me: null (correct) ✅
+5. login admin → 200 (role: admin) ✅
+6. login operator → 200 (role: operator) ✅
+7. login viewer → 200 (role: viewer) ✅
+8. lint clean ✅
+9. memory: 1042MB (stable within a single tool call) ✅
+
+Stage Summary:
+- 401 fixed (bcrypt → plain text upsert migration)
+- GLM updated to 5.2 Max (256k context, flagship)
+- SIL protocol applied: root cause analysis, test-first, lessons documented
+- Commit e32329e pushed
